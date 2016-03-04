@@ -1,4 +1,5 @@
 var resultsCompact = document.getElementById('results-compact');
+var settingCustomHeader = document.getElementById('setting-custom-header');
 
 function showResults(resp) {
     console.log("show-results", resp);
@@ -17,21 +18,23 @@ function showResults(resp) {
     }
 }
 
-function callFirstServer(id) {
-    console.log("first-call", id);
+function callFirstServer(id, useCustomHeader) {
+    console.log("call-first", id);
     var r = new XMLHttpRequest();
     r.addEventListener("load", function() {
         showResults(this.responseText);
     });
     r.open("GET", "http://localhost:9201/" + id);
-    // Invokes CORS
-//    r.setRequestHeader('Xhr-Demo-Request', 'auth');
+    if (useCustomHeader) {
+        // Invokes preflight check
+        r.setRequestHeader('Xhr-Demo-Request', 'auth');
+    }
     r.send();
 }
 
 function runDemo() {
     var id = Math.random() + "";
-    callFirstServer(id);
+    callFirstServer(id, settingCustomHeader.checked);
 }
 
 function addHooks() {
