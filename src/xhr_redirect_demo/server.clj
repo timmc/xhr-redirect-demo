@@ -19,4 +19,5 @@
   [& args]
   (s/run-server (make-xhr-app :first) {:port 9201})
   (s/run-server (make-xhr-app :second) {:port 9202})
-  (s/run-server ui-app {:port 9200}))
+  (s/run-server ui-app {:port 9200})
+  (println "Visit http://localhost:9200/"))
