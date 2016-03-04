@@ -1,21 +1,73 @@
 (ns xhr-redirect-demo.server
-  (:require [org.httpkit.server :as s]))
+  (:require [cheshire.core :as json]
+            [clojure.java.io :as io]
+            [org.httpkit.server :as s]))
+
+(def main-page
+  (slurp (io/resource "public/index.html") :encoding "UTF-8"))
+
+(def main-js
+  (slurp (io/resource "public/main.js") :encoding "UTF-8"))
 
 (defn ui-app
+  "An app for UI responses."
   [req]
-  {:status 200
-   :headers {"Content-Type" "text/plain;charset=utf-8"}
-   :body "hello HTTP!"})
+  (case (:uri req)
+    "/" {:status 200
+         :headers {"Content-Type" "text/html;charset=utf-8"}
+         :body main-page}
+    "/main.js" {:status 200
+                :headers {"Content-Type" "text/javascript;charset=utf-8"}
+                :body main-js}
+    {:status 404
+     :headers {"Content-Type" "text/plain;charset=utf-8"}
+     :body "Page not found"}))
+
+(def calls
+  (atom {}))
+
+(defn record-call
+  [which req]
+  (let [id (:uri req)]
+    (swap! calls update-in [id] (fnil conj [])
+           {:which which
+            :method (:request-method req)
+            :header (get-in req [:headers "xhr-demo-request"])})))
 
 (defn make-xhr-app
+  "Given :first or :second, yield an app for the appropriate XHR responder."
   [which]
   (fn xhr-app
     [req]
-    {:status 200
-     :headers {"Content-Type" "text/plain;charset=utf-8"}
-     :body (name which)}))
+    (record-call which req)
+    (let [resp-json (json/generate-string [which (get @calls (:uri req))])
+          hdr-base {"Content-Type" "application/json;charset=utf-8"
+                    "Access-Control-Allow-Origin" "*"
+                    "Access-Control-Allow-Headers" "Xhr-Demo-Request"
+                    "Access-Control-Expose-Headers" "Xhr-Demo-Response"}]
+      (case (:request-method req)
+        :options
+        {:status 200
+         :headers hdr-base
+         :body resp-json}
+
+        :get
+        (case which
+          :first
+          {:status 303
+           :headers (merge hdr-base
+                           {"Location" (str "http://localhost:9202"
+                                            (:uri req))})
+           :body resp-json}
+
+          :second
+          {:status 200
+           :headers hdr-base
+           :body resp-json})))))
+
 
 (defn main
+  "Start servers."
   [& args]
   (s/run-server (make-xhr-app :first) {:port 9201})
   (s/run-server (make-xhr-app :second) {:port 9202})
