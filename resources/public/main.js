@@ -3,15 +3,7 @@
 var resultsCompact = document.getElementById('results-compact');
 var settingCustomHeader = document.getElementById('setting-custom-header');
 
-function showResults(resp) {
-    console.log("show-results", resp);
-
-    var data = JSON.parse(resp);
-    var msg = "Response came from " + data[0] + " endpoint. Calls follow.";
-    var entries = [msg].concat(data[1].map(function(el, i){
-        return JSON.stringify(el);
-    }));
-
+function showResults(entries) {
     resultsCompact.innerHTML = "";
     for (var i=0; i<entries.length; i++) {
         var row = document.createElement('li');
@@ -20,11 +12,20 @@ function showResults(resp) {
     }
 }
 
+function successToResults(respText) {
+    var data = JSON.parse(respText);
+    var msg = "Response came from " + data[0] + " endpoint. Calls follow.";
+    var entries = [msg].concat(data[1].map(function(el, i){
+        return JSON.stringify(el);
+    }));
+    return entries;
+}
+
 function callFirstServer(id, useCustomHeader) {
     console.log("call-first", id);
     var r = new XMLHttpRequest();
     r.addEventListener("load", function() {
-        showResults(this.responseText);
+        showResults(successToResults(this.responseText));
     });
     r.open("GET", "http://"+hostname+":9201/" + id);
     if (useCustomHeader) {
