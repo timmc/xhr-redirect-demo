@@ -8,11 +8,13 @@ Javascript that makes an XHR request to the second port; the response
 is a redirect to a resource on the third port. The requests as seen by
 the server are then displayed in the UI.
 
-## Results
+## Purpose
 
-- Firefox 38 and Chromium 48 convey custom headers on XHR redirect,
-  but if the request requires preflight the redirect is
-  rejected. Chromium is very explicit about this in the console log.
+Three parts:
+
+- Demonstrate that headers set on a cross-origin XHR are preserved
+- See what happens if that XHR requires preflight
+- Base for other demos
 
 ## Usage
 
@@ -21,6 +23,12 @@ the server are then displayed in the UI.
 The demo uses `lvh.me` instead of `localhost` for local hosting; if
 that site disappears or changes or you need to work offline, add
 `127.0.0.1 lvh.me` to your `/etc/hosts` file.
+
+## Results
+
+- Firefox 38 and Chromium 48 convey custom headers on XHR redirect,
+  but if the request requires preflight the redirect is
+  rejected. Chromium is very explicit about this in the console log.
 
 ## License
 
