@@ -53,6 +53,7 @@ CORS."
     (let [resp-json (json/generate-string [which (get @calls (:uri req))])
           hdr-base {"Content-Type" "application/json;charset=utf-8"
                     "Access-Control-Allow-Origin" "*"
+                    "Access-Control-Allow-Methods" "GET,OPTIONS"
                     "Access-Control-Allow-Headers" "Xhr-Demo-Request"
                     "Access-Control-Expose-Headers" "Xhr-Demo-Response"}]
       (case (:request-method req)
