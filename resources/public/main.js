@@ -23,6 +23,8 @@ function successToResults(respText) {
 
 function callFirstServer(id, useCustomHeader) {
     console.log("call-first", id);
+    resultsCompact.innerHTML = "";
+
     var r = new XMLHttpRequest();
     r.addEventListener("load", function() {
         showResults(successToResults(this.responseText));
