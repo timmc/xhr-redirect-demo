@@ -8,6 +8,12 @@ Javascript that makes an XHR request to the second port; the response
 is a redirect to a resource on the third port. The requests as seen by
 the server are then displayed in the UI.
 
+## Results
+
+- Firefox 38 and Chromium 48 convey custom headers on XHR redirect,
+  but if the request requires preflight the redirect is
+  rejected. Chromium is very explicit about this in the console log.
+
 ## Usage
 
 `lein run`, then visit the URL displayed in the terminal.
