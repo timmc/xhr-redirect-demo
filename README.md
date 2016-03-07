@@ -29,6 +29,9 @@ that site disappears or changes or you need to work offline, add
 - Firefox 38 and Chromium 48 convey custom headers on XHR redirect,
   but if the request requires preflight the redirect is
   rejected. Chromium is very explicit about this in the console log.
+- I totally could have seen that in step 6 of
+  https://www.w3.org/TR/cors/#generic-cross-origin-request-algorithms
+  if I'd read that doc more carefully
 
 ## License
 
