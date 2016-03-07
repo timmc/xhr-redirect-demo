@@ -37,11 +37,12 @@ CORS."
 
 (defn record-call
   [which req]
-  (let [id (:uri req)]
-    (swap! calls update-in [id] (fnil conj [])
-           {:which which
-            :method (:request-method req)
-            :header (get-in req [:headers "xhr-demo-request"])})))
+  (let [id (:uri req)
+        entry {:which which
+               :method (:request-method req)
+               :header (get-in req [:headers "xhr-demo-request"])}]
+    (swap! calls update-in [id] (fnil conj []) entry)
+    (println "Called" id "with" entry)))
 
 (defn make-xhr-app
   "Given :first or :second, yield an app for the appropriate XHR responder."
