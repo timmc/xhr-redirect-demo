@@ -44,43 +44,48 @@ CORS."
     (swap! calls update-in [id] (fnil conj []) entry)
     (println "Called" id "with" entry)))
 
+(defn xhr-app
+  [req which]
+  (record-call which req)
+  (let [resp-json (json/generate-string [which (get @calls (:uri req))])
+        hdr-base {"Content-Type" "application/json;charset=utf-8"
+                  "Access-Control-Allow-Origin" "*"
+                  "Access-Control-Allow-Methods" "GET"
+                  "Access-Control-Allow-Headers" "Xhr-Demo-Request"
+                  "Access-Control-Expose-Headers" "Xhr-Demo-Response"}]
+    (case (:request-method req)
+      :options
+      {:status 200
+       :headers hdr-base
+       :body resp-json}
+
+      :get
+      (case which
+        :first
+        {:status 303
+         :headers (merge hdr-base
+                         {"Location" (str "http://" host ":9202"
+                                          (:uri req))})
+         :body resp-json}
+
+        :second
+        {:status 200
+         :headers hdr-base
+         :body resp-json}))))
+
 (defn make-xhr-app
   "Given :first or :second, yield an app for the appropriate XHR responder."
   [which]
-  (fn xhr-app
+  (fn closed-xhr-app
     [req]
-    (record-call which req)
-    (let [resp-json (json/generate-string [which (get @calls (:uri req))])
-          hdr-base {"Content-Type" "application/json;charset=utf-8"
-                    "Access-Control-Allow-Origin" "*"
-                    "Access-Control-Allow-Methods" "GET,OPTIONS"
-                    "Access-Control-Allow-Headers" "Xhr-Demo-Request"
-                    "Access-Control-Expose-Headers" "Xhr-Demo-Response"}]
-      (case (:request-method req)
-        :options
-        {:status 200
-         :headers hdr-base
-         :body resp-json}
-
-        :get
-        (case which
-          :first
-          {:status 303
-           :headers (merge hdr-base
-                           {"Location" (str "http://" host ":9202"
-                                            (:uri req))})
-           :body resp-json}
-
-          :second
-          {:status 200
-           :headers hdr-base
-           :body resp-json})))))
-
+    ;; Allow reloading with var indirection
+    (#'xhr-app req which)))
 
 (defn main
   "Start servers."
   [& args]
   (s/run-server (make-xhr-app :first) {:port 9201})
   (s/run-server (make-xhr-app :second) {:port 9202})
-  (s/run-server ui-app {:port 9200})
+  ;; Allow reloading with var indirection
+  (s/run-server #'ui-app {:port 9200})
   (println (str "Visit http://" host ":9200/")))
