@@ -3,8 +3,17 @@
             [clojure.java.io :as io]
             [org.httpkit.server :as s]))
 
+(def host
+  "Domain name to use. We use lvh.me (points to 127.0.0.1) instead of
+localhost because browsers may treat local hosts differently for
+CORS."
+  "lvh.me")
+
 (def main-page
-  (slurp (io/resource "public/index.html") :encoding "UTF-8"))
+  (.replace
+   (slurp (io/resource "public/index.html") :encoding "UTF-8")
+   "${hostname}"
+   (String. (.encode (java.util.Base64/getEncoder) (.getBytes host)))))
 
 (def main-js
   (slurp (io/resource "public/main.js") :encoding "UTF-8"))
@@ -56,7 +65,7 @@
           :first
           {:status 303
            :headers (merge hdr-base
-                           {"Location" (str "http://localhost:9202"
+                           {"Location" (str "http://" host ":9202"
                                             (:uri req))})
            :body resp-json}
 
@@ -72,4 +81,4 @@
   (s/run-server (make-xhr-app :first) {:port 9201})
   (s/run-server (make-xhr-app :second) {:port 9202})
   (s/run-server ui-app {:port 9200})
-  (println "Visit http://localhost:9200/"))
+  (println (str "Visit http://" host ":9200/")))

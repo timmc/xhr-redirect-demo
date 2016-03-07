@@ -12,6 +12,10 @@ the server are then displayed in the UI.
 
 `lein run`, then visit the URL displayed in the terminal.
 
+The demo uses `lvh.me` instead of `localhost` for local hosting; if
+that site disappears or changes or you need to work offline, add
+`127.0.0.1 lvh.me` to your `/etc/hosts` file.
+
 ## License
 
 Copyright © 2016 Tim McCormack and his employer, Brightcove (depending
