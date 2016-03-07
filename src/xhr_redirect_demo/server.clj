@@ -38,9 +38,12 @@ CORS."
 (defn record-call
   [which req]
   (let [id (:uri req)
+        header (first
+                (filter #(= (get-in req [:headers %]) "payload")
+                        ["accept" "xhr-demo-request"]))
         entry {:which which
                :method (:request-method req)
-               :header (get-in req [:headers "xhr-demo-request"])}]
+               :header header}]
     (swap! calls update-in [id] (fnil conj []) entry)
     (println "Called" id "with" entry)))
 

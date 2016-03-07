@@ -1,7 +1,7 @@
 // var hostname is set in index.html
 
 var resultsCompact = document.getElementById('results-compact');
-var settingCustomHeader = document.getElementById('setting-custom-header');
+var settingPreflight = document.getElementById('setting-preflight');
 
 function showResults(entries) {
     resultsCompact.innerHTML = "";
@@ -21,7 +21,7 @@ function successToResults(respText) {
     return entries;
 }
 
-function callFirstServer(id, useCustomHeader) {
+function callFirstServer(id, usePreflight) {
     console.log("call-first", id);
     resultsCompact.innerHTML = "";
 
@@ -30,16 +30,15 @@ function callFirstServer(id, useCustomHeader) {
         showResults(successToResults(this.responseText));
     });
     r.open("GET", "http://"+hostname+":9201/" + id);
-    if (useCustomHeader) {
-        // Invokes preflight check
-        r.setRequestHeader('Xhr-Demo-Request', 'auth');
-    }
+    // Custom header invokes preflight check
+    var headerName = usePreflight ? 'Xhr-Demo-Request' : 'Accept';
+    r.setRequestHeader(headerName, 'payload');
     r.send();
 }
 
 function runDemo() {
     var id = Math.random() + "";
-    callFirstServer(id, settingCustomHeader.checked);
+    callFirstServer(id, settingPreflight.checked);
 }
 
 function addHooks() {
